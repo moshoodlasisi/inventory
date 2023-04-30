@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 app.use(express.json());
 
 const inventory = [];
+
 const users = [
     { username: 'user1', password: 'password1' }, 
     { username: 'user2', password: 'password2' } 
@@ -13,9 +14,16 @@ const users = [
 
 app.post('/login', (req, res) => {
     //Authenticate User
-    const { username, password} = req.body;
+    const { username, password } = req.body;
+
+    // Does a user with the username exists
     const user = users.find((u) => u.username === username);
-    if (username === username && password === password) {
+
+    if(!user){
+        return res.status(401).json({ error: 'User not found'})
+    }
+
+    if (user.username === username && user.password === password) {
         const accessToken = jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET);
         res.json({ accessToken: accessToken });
     } else {
@@ -38,14 +46,30 @@ function authenticateToken(req, res, next) {
 
 //Get All Inventory
 app.get('/inventory', authenticateToken, (req, res) => {
-    res.json(inventory);
+    const userName = req.user.username;
+    const userInventories = inventory.filter(inv => inv.owner.userName === userName);
+    res.json(userInventories);
   });
 
 //Create Inventory
 app.post('/inventory', authenticateToken, (req, res) => {
+    /**
+     * - Extract the user creating the inventory
+     * - Store the user along with the inventory
+     */
     const { name, quantity } = req.body;
+    const { user } = req;
+
     const id = uuid();
-    const newInventory = { id, name, quantity };
+    const newInventory = { 
+        id, 
+        name, 
+        quantity, 
+        owner: { userName: user.username }, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+    };
+
     inventory.push(newInventory);
     res.json(newInventory);
 });
@@ -92,7 +116,6 @@ app.delete('/inventory/:id', authenticateToken, (req, res) => {
     res.json({ success: true });
 });
 
-
-
-
-app.listen(8000);
+app.listen(8000, () => {
+    console.log('SERVER RUNNING ON PORT 8000...')
+});
