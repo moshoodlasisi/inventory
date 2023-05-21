@@ -1,0 +1,79 @@
+body {
+    font-family: 'Kokoro', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    position: relative;
+    width: 686px;
+    height: 624px;
+    background: #FFFFFF;
+}
+
+h1 {
+    position: absolute;
+    width: 180px;
+    height: 45px;
+    left: 144px;
+    top: 137px;
+    font-size: 24px;
+    line-height: 36px;
+    color: #000000;
+}
+
+form {
+    position: absolute;
+    width: 424px;
+    height: 74px;
+    left: 144px;
+    top: 226px;
+}
+
+input[type=text], input[type=password] {
+    width: 100%;
+    height: 45px;
+    background: #EDEDED;
+    border-radius: 15px;
+    border: none;
+    padding-left: 15px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 21px;
+    color: #000000;
+}
+
+input[type=submit] {
+    width: 167px;
+    height: 49px;
+    background: #8683FE;
+    border-radius: 15px;
+    border: none;
+    color: #FFFFFF;
+    font-size: 15px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.error {
+    position: absolute;
+    width: 366px;
+    height: 66px;
+    left: 164px;
+    top: 0px;
+    background: #221F1F;
+    display: none;
+}
+
+.error p {
+    position: absolute;
+    width: 177px;
+    height: 30px;
+    left: 95px;
+    top: 7px;
+    font-size: 15px;
+    line-height: 15px;
+    text-align: center;
+    color: #FFFFFF;
+}
