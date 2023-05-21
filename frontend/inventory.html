@@ -100,7 +100,7 @@
 <body>
   <div class="inventories">
     <h1 class="title">Inventories</h1>
-    <h1 class="welcome">Welcome, Moshood!</h1>
+    <h1 class="welcome" id="welcome-text"></h1>
   </div>
 
   <div class="button-container">
@@ -122,19 +122,6 @@
     </table>
   </div>
 
-  <script>
-    // retrieve data from localStorage and update table
-    let inventories = JSON.parse(localStorage.getItem('inventories')) || [];
-    const tableBody = document.getElementById('inventory-table');
-    inventories.forEach((inventory) => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${inventory.id}</td>
-        <td>${inventory.name}</td>
-        <td>${inventory.quantity}</td>
-      `;
-      tableBody.appendChild(row);
-    });
-  </script>
+  <script src="./inventory.js"></script>
 </body>
 </html>
