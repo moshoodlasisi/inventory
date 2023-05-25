@@ -19,6 +19,7 @@ const setWelcomeText = () => {
 
 const populateInventoriesTable = (inventories) => {
   const tableBody = document.getElementById('inventory-table');
+  tableBody.innerHTML = ''; // clear existing table rows
   inventories.forEach((inventory) => {
     const row = document.createElement('tr');
 
@@ -55,11 +56,26 @@ const getUserInventories = async () => {
   }
 }
 
+const clearTableData = () => {
+  const tableBody = document.getElementById('inventory-table');
+  tableBody.innerHTML = '';
+}
+
+const clearLocalStorageData = () => {
+  localStorage.clear();
+}
+
 
 
 function main() {
   setWelcomeText()
   getUserInventories()
+
+  const logoutButton = document.getElementById('logout');
+  logoutButton.addEventListener('click', () => {
+    clearTableData();
+    clearLocalStorageData();
+  });
 }
 
 // Run script

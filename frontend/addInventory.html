@@ -5,40 +5,23 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add new Inventory</title>
+    <link rel="stylesheet" href="addInventory.css">
 </head>
 <body>
-  <form>
-    <label for="id">ID:</label>
-    <input type="text" id="id" name="id"><br>
-  
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name"><br>
-  
-    <label for="quantity">Quantity:</label>
-    <input type="number" id="quantity" name="quantity"><br>
-  
-    <button type="submit">Submit</button>
-  </form>
-  
-  <script>
-    const form = document.querySelector('form');
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      
-      // get form data
-      const id = document.getElementById('id').value;
-      const name = document.getElementById('name').value;
-      const quantity = document.getElementById('quantity').value;
-  
-      // save data to localStorage
-      const inventory = { id, name, quantity };
-      let inventories = JSON.parse(localStorage.getItem('inventories')) || [];
-      inventories.push(inventory);
-      localStorage.setItem('inventories', JSON.stringify(inventories));
-  
-      // redirect to inventory page
-      window.location.href = 'inventory.html';
-    });
-  </script>  
+  <div>
+    <h2>Create new Inventory</h2>
+
+    <form class="form">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name"><br>
+    
+      <label for="quantity">Quantity</label>
+      <input type="number" id="quantity" name="quantity"><br>
+    
+      <button type="submit">Create</button>
+    </form>
+  </div>
+
+  <script src="./addInventory.js"></script>  
 </body>
 </html>

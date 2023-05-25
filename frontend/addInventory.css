@@ -1,0 +1,56 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin-left: 10%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0px;
+    width: 746px;
+    height: 650px;
+    background: #FFFFFF;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-family: 'Kokoro';
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 21px;
+
+    color: #000000;
+}
+
+input {
+    width: 424px;
+    height: 40px;
+
+    background: #EDEDED;
+    border-radius: 15px;
+    border: none;
+}
+
+button {
+    width: 160px;
+    height: 40px;
+    font-family: 'Kokoro';
+    font-style: normal;
+    font-weight: bold;
+    font-size: 15px;
+    line-height: 22px;
+    text-align: center;
+    color: #FFFFFF;
+    background: #8683FE;
+    border-radius: 15px;
+    border: none;
+}

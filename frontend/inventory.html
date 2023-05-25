@@ -3,111 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Inventory Page</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 1000px;
-      align-content: center;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 20px;
-      width: 700px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 8px;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-
-    .inventories {
-      position: relative;
-      width: 95%;
-      height: 0px;
-      background: #FFFFFF;
-      display: flex;
-      flex-direction: row;
-      align-content: space-between ;
-    }
-
-    .title {
-      position: absolute;
-      width: 180px;
-      height: 45px;
-      left: 65px;
-      top: 36px;
-      font-family: 'Kokoro';
-      font-style: normal;
-      font-weight: 400;
-      font-size: 24px;
-      line-height: 36px;
-      color: #000000;
-    }
-
-    .welcome {
-      position: absolute;
-      width: 128px;
-      height: 20px;
-      right: 65px;
-      top: 36px;
-      font-family: 'Kokoro';
-      font-style: normal;
-      font-weight: 400;
-      font-size: 15px;
-      line-height: 18px;
-      color: #000000;
-    }
-
-    .button-container {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 50px;
-      margin-right: 0px;
-    }
-
-    button {
-      background-color: #6f69c9;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      text-align: center;
-      text-decoration: none;
-      /* display: inline-block; */
-      font-size: 16px;
-      margin-left: 600px;
-      margin-top: 20px;
-      border-radius: 20px;
-      display: flex;
-      justify-content: flex-end;
-    }
-  </style>
+  <link href="./inventory.css" rel="stylesheet" />
 </head>
 <body>
-  <div class="inventories">
-    <h1 class="title">Inventories</h1>
-    <h1 class="welcome" id="welcome-text"></h1>
-  </div>
-
-  <div class="button-container">
-    <button onclick="location.href='addInventory.html'">Add new inventory</button>
-  </div>
-
   <div class="container">
+    
+    <h1 class="welcome" id="welcome-text"></h1>
+
+    <div class="logout-container">
+      <button onclick="location.href='index.html'" id="logout">Log out</button>
+    </div>
+
+    <div class="inventories">
+      <h1 class="title">Inventories</h1>
+    </div>
+  
+    <div class="button-container">
+      <button onclick="location.href='addInventory.html'" id="addInventory">Add new inventory</button>
+    </div>
+
     <table>
       <thead>
         <tr>
