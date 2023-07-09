@@ -133,12 +133,12 @@ app.put('/inventory/:id', authenticateToken, async (req, res) => {
         return res.status(404).json({ error: 'Inventory not found' });
     }
     if (action === 'add') {
-        foundInventory.quantity += quantity;
+        foundInventory.quantity += parseInt(quantity);
     } else if (action === 'remove') {
         if (foundInventory.quantity < quantity) {
             return res.status(400).json({ error: 'Insufficient quantity' });
         }
-        foundInventory.quantity -= quantity;
+        foundInventory.quantity -= parseInt(quantity);
     } else {
         return res.status(400).json({ error: 'Invalid action' });
     }
