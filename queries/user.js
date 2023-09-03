@@ -1,12 +1,12 @@
 export const userQueries = {
   saveUser: `
     INSERT INTO 
-      test_user (name) 
+      users (username, password) 
     VALUES
-      ($1)
+      ($1, $2)
   `,
 
   fetchAllUsers: `
-    SELECT * FROM test_user;
+    SELECT * FROM users WHERE username = $1;
   `
 }

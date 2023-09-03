@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 // I've added esm module to compile it for us
 import { db } from './utils/database';
 import { userQueries } from './queries/user';
+import { inventoryQueries } from './queries/inventory';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -26,29 +27,13 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-const inventoryFile = './inventory.json';
 
-//write the inventory data from the JSON file
-const saveInventoryData = async (data) => {
-    const stringifyData = JSON.stringify(data);
-    await fs.writeFile(inventoryFile, stringifyData);
-};
-
-//read the inventory data from the JSON file
-const getInventoryData = async () => {
-    try {
-     const jsonData = await fs.readFile(inventoryFile);
-     return JSON.parse(jsonData);
-    } catch (err) {
-        console.log('Error reading file', err);
-        return [];
-    }
-};
 
 const users = [
     { username: 'user1', password: 'password1' }, 
     { username: 'user2', password: 'password2' } 
 ];
+
 
 /******************
  * TEST ROUTE
@@ -75,22 +60,29 @@ app.get('/inventory/test-user', async (req, res) => {
     res.json({users})
 })
 
-app.post('/login', (req, res) => {
+
+app.post('/login', async (req, res) => {
     //Authenticate User
     const { username, password } = req.body;
 
     //Does a user with the username exist?
-    const user = users.find((u) => u.username === username);
+    try {
+        // await db.none(userQueries.saveUser, [ username, password ])
 
-    if (!user) {
-        return res.status(401).json({ error: 'User not found' })
-    }
+        const user = await db.oneOrNone(userQueries.fetchAllUsers, username);
 
-    if (user.username === username && user.password === password) {
-        const accessToken = jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET);
-        res.json({ accessToken: accessToken });
-    } else {
-        res.status(401).json({ error: 'Invalid username or password'})
+        if (!user) {
+            return res.status(401).json({ error: 'User not found' })
+        }
+
+        if (user.username === username && user.password === password) {
+            const accessToken = jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET);
+            res.json({ accessToken: accessToken });
+        } else {
+            res.status(401).json({ error: 'Invalid username or password'})
+        }
+    } catch (err) {
+        console.log('Error authenticating user', err);
     }
 });
 
@@ -109,10 +101,14 @@ function authenticateToken(req, res, next) {
 
 //Get All Inventory
 app.get('/inventory', authenticateToken, async (req, res) => {
-    const userName = req.user.username;
-    const inventories = await getInventoryData();
-    const userInventories = inventories.filter((inv) => inv.owner.userName === userName);
-    res.json(userInventories);
+    const owner = req.user.username;
+    try {
+        const inventories = await db.any(inventoryQueries.getAll, owner);
+        res.json(inventories);
+    } catch (err) {
+        console.log('Error fetching inventory data', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
   });
 
 //Create Inventory
@@ -122,71 +118,76 @@ app.post('/inventory', authenticateToken, async (req, res) => {
      * - Store the user along with the inventory
      */
     const { name, quantity } = req.body;
-    const { user } = req;
+    const owner = req.user.username;
 
-    const id = uuid();
-    const newInventory = { 
-        id, 
-        name, 
-        quantity,
-        owner: { userName: user.username },
-        createdAt: new Date(),
-        updatedAt: new Date() 
-    };
-    const inventories = await getInventoryData();
-    inventories.push(newInventory);
-    await saveInventoryData(inventories);
-    res.json(newInventory);
+    try {
+        await db.none(inventoryQueries.create, [name, quantity, owner]);
+        res.json({ message: 'Inventory item created successfully' });
+    } catch (err) {
+        console.log('Error creating inventory item', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
 //Read Inventory
 app.get('/inventory/:id', authenticateToken, async (req, res) => {
-    const id = req.params.id;
-    const inventories = await getInventoryData();
-    const foundInventory = inventories.find((item) => item.id === id);
-    if (!foundInventory) {
-        return res.status(404).json({ error: 'Inventory not found'});
+    const { id } = req.params;
+    const owner = req.user.username;
+    try {
+        const inventory = await db.oneOrNone(inventoryQueries.getById, id);
+        if (inventory) {
+            res.json(inventory);
+        } else {
+            res.status(404).json({ message: 'Inventory item not found' });
+        }
+    } catch (err) {
+        console.log(`Error fetching inventory item with ID ${id}`, err);
+        res.status(500).json({ message: 'Internal server error' });
     }
-    res.json(foundInventory);
 });
 
 //Update Inventory
 app.put('/inventory/:id', authenticateToken, async (req, res) => {
     const id = req.params.id;
     const { action, quantity } = req.body;
+    const owner = req.user.username;
 
-    const inventories = await getInventoryData();
-    const foundInventory = inventories.find(item => item.id === id);
-    if (!foundInventory) {
-        return res.status(404).json({ error: 'Inventory not found' });
-    }
-    if (action === 'add') {
-        foundInventory.quantity += parseInt(quantity);
-    } else if (action === 'remove') {
-        if (foundInventory.quantity < quantity) {
-            return res.status(400).json({ error: 'Insufficient quantity' });
+    try {
+        let queryText, queryParams;
+        if (action === 'add') {
+            queryText = 'UPDATE inventory SET quantity = quantity + $1, updated_at = NOW() WHERE id = $2';
+            queryParams = [quantity, id];
+        } else if (action === 'remove') {
+            queryText = 'UPDATE inventory SET quantity = quantity - $1, updated_at = NOW() WHERE id = $2 AND quantity >= $1';
+            queryParams = [quantity, id];
+        } else {
+            return res.status(400).json({ error: 'Invalid action' });
         }
-        foundInventory.quantity -= parseInt(quantity);
-    } else {
-        return res.status(400).json({ error: 'Invalid action' });
+        const { rowCount } = await db.query(queryText, queryParams);
+        if (rowCount === 0) {
+            return res.status(404).json({ error: 'Inventory not found' });
+        }
+        res.json({ message: 'update successful'});
+    } catch (error) {
+        console.log(`Error updating inventory item with ID ${id}`, error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    foundInventory.updatedAt = new Date();
-    await saveInventoryData(inventories);
-    res.json(foundInventory);
 });
 
 //Delete Inventory
 app.delete('/inventory/:id', authenticateToken, async (req, res) => {
-    const id = req.params.id;
-
-    const inventories = await getInventoryData();
-    const foundInventoryIndex = inventories.findIndex(item => item.id === id);
-    if (foundInventoryIndex === -1) {
-        return res.status(404).json({ error: 'Inventory not found' });
+    const { id } = req.params;
+    try {
+        const result = await db.result(inventoryQueries.delete, id, r => r.rowCount);
+        if (result === 1) {
+            res.json({ message: `Inventory item with ID ${id} deleted successfully` });
+        } else {
+            res.status(404).json({ message: 'Inventory item not found' });
+        }
+    } catch (err) {
+        console.log(`Error deleting inventory item with ID ${id}`, err);
+        res.status(500).json({ message: 'Internal server error' });
     }
-    inventories.splice(foundInventoryIndex, 1);
-    await saveInventoryData(inventories);
-    res.json({ success: true });
 });
 
 app.listen(8000, () => {
